@@ -89,12 +89,13 @@ fledged_all_seg <- subset(fledged_all_seg, Notes != "exclude from productivity"
 # output: x_num - value is 0, 1, or NA
 check_alive = function(x, output){
   x_num = NA
-  if(is.na(x) | x == ""){
+  if(missing(x) | is.na(x) | x == ""){
     return(NA)
   }
   
   x <- tolower(x)
-  if(grepl("dead", x) | grepl("abandonded", x)){
+  if(grepl("dead", x) | grepl("abandoned", x) | grepl("predated", x) |
+     grepl("abandonded", x)){
     x_num = 0
   }
   else if(grepl("missing", x)){
@@ -107,4 +108,5 @@ check_alive = function(x, output){
 
 # assign 1 for fledged chicks, 0 for dead chicks or abandoned eggs, and NA
 # for missing chicks
-alive <- apply(fledged_all_seg[,4], 1, check_alive())
+alive <- apply(fledged_all_seg[,4], 1, check_alive)
+fledged_all_seg$Fledged_Bool <- alive
