@@ -7,6 +7,7 @@ PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-20
 # import packages
 library(readxl)
 library(dplyr)
+library(ggplot2)
 
 ################################################################################
 # import data from "ROST productivity raw data 2016-2021.xlsx"
@@ -109,4 +110,53 @@ check_alive = function(x, output){
 # assign 1 for fledged chicks, 0 for dead chicks or abandoned eggs, and NA
 # for missing chicks
 alive <- apply(fledged_all_seg[,4], 1, check_alive)
+alive <- lapply(alive, as.numeric)
 fledged_all_seg$Fledged_Bool <- alive
+
+################################################################################
+# make scatter plot of mean productivity by neighborhood by year
+
+# get mean productivity by year
+year_means_list = list()
+for(i in 2017:2021){
+  # get mean of Fledged_Bool for all rows where Year == i
+  temp_mean = mean(as.numeric(fledged_all_seg$Fledged_Bool
+                              [fledged_all_seg$Year == i]), na.rm = TRUE)
+  year_means_list = c(year_means_list, temp_mean)
+}
+
+# get mean productivity by neighborhood
+neigh_means_list = list()
+for(i in 1:9){
+  # get mean of Fledged_Bool for all rows where Neighborhood == i
+  temp_mean = mean(as.numeric(fledged_all_seg$Fledged_Bool
+                              [fledged_all_seg$Neighborhood_Number == i]), na.rm = TRUE)
+  neigh_means_list = c(neigh_means_list, temp_mean)
+}
+
+# get mean productivity by neighborhood by year
+neigh_year_means_list = list()
+year_list = list()
+neigh_list = list()
+for(i in 2017:2021){
+  for(j in 1:9){
+    temp_year = 
+    temp_mean = mean(as.numeric(fledged_all_seg$Fledged_Bool
+                                [fledged_all_seg$Year == i & 
+                                    fledged_all_seg$Neighborhood_Number == j]), na.rm = TRUE)
+    neigh_year_means_list = c(neigh_year_means_list, temp_mean)
+    year_list = c(year_list, i)
+    neigh_list = c(neigh_list, j)
+  }
+}
+
+# combine year, neighborhood, means to form data frame
+graph_df = as.data.frame(cbind(Year = year_list, Neighborhood = neigh_list, 
+                               Mean = neigh_year_means_list))
+graph_df$Neighborhood <- as.numeric(graph_df$Neighborhood)
+graph_df$Mean <- as.numeric(graph_df$Mean)
+graph_df %>%                                           
+  ggplot(aes(x=Neighborhood,y=Mean, color=Year)) +            
+  geom_point() +                                     
+  labs(x="Neigborhood",y="Mean Productivity (% Fledged)",
+       fill="Year")
