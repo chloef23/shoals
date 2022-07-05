@@ -26,12 +26,13 @@ prod_2019 <- read_excel(PRODUCTIVITY_DATA, sheet="Productivity 2019")
 prod_2020 <- read_excel(PRODUCTIVITY_DATA, sheet="Productivity 2020")
 prod_2021 <- read_excel(PRODUCTIVITY_DATA, sheet="Productivity 2021")
 
-# function to get first three car from string
+# function to get first three char from string
 extract_pfr = function(x, output){
   return(substring(x, 0, 3))
 }
 
-# for each year, get all PFRs on chicks banded that year
+# for each year, extract all PFRs on chicks banded that year
+# note code is different for each year because data is in different format
 pfr_2017 = prod_2017$PFR[prod_2017$PFR != "-" & !is.na(prod_2017$PFR)]
 pfr_2017 = lapply(pfr_2017, extract_pfr)
 year = as.list(rep(2017, length(pfr_2017)))
@@ -62,3 +63,76 @@ banded_pfr_all <- banded_pfr_all %>% relocate("Year")
 
 ################################################################################
 # make list of resights and their neighborhood by year
+
+# import data from "ROST resight raw data 2016-2022.xlsx"
+resi_2017 <- read_excel(RESIGHT_DATA, sheet="Resights 2017")
+resi_2018 <- read_excel(RESIGHT_DATA, sheet="Resights 2018")
+resi_2019 <- read_excel(RESIGHT_DATA, sheet="Resights 2019")
+resi_2020 <- read_excel(RESIGHT_DATA, sheet="Resights 2020")
+resi_2021 <- read_excel(RESIGHT_DATA, sheet="Resights 2021")
+
+# for each year, extract all resight PFRs and the neighborhood they were sighted at
+# note code is different for each year because data is in different format
+resipfr_2017 = resi_2017[resi_2017$"Aux type" == "PFR",]
+resipfr_2017 = resipfr_2017[c("Specific Location", "Aux code")]
+resipfr_2017$Year = 2017
+
+resipfr_2018 = resi_2018[resi_2018$"Aux type" == "PFR",]
+resipfr_2018 = resipfr_2018[c("Specific Location", "Aux code")]
+resipfr_2018$Year = 2018
+
+resipfr_2019 = resi_2019[resi_2019$"Aux type" == "PFR",]
+resipfr_2019 = resipfr_2019[c("Specific Location", "Aux code")]
+resipfr_2019$Year = 2019
+
+resipfr_2020 = resi_2020[resi_2020$"Aux type" == "PFR",]
+resipfr_2020 = resipfr_2020[c("Specific Location", "Aux code")]
+resipfr_2020$Year = 2020
+
+resipfr_2021 = resi_2021[resi_2021$"Aux type" == "PFR",]
+resipfr_2021 = resipfr_2021[c("Specific Location", "Aux code")]
+resipfr_2021$Year = 2021
+
+resipfr_2022 = resi_2022[resi_2022$"Aux type" == "PFR",]
+resipfr_2022 = resipfr_2022[c("Specific Location", "Aux code")]
+resipfr_2022$Year = 2022
+
+# combine all pfr ids into one data frame
+resipfr_all = as.data.frame(rbind(resipfr_2017, resipfr_2018, resipfr_2019, 
+                                  resipfr_2020, resipfr_2021, resipfr_2022))
+colnames(resipfr_all) = c("Neighborhood", "PFR", "Year")
+resipfr_all <- resipfr_all %>% relocate("Year")
+
+# function to extract numbers from string
+# input: x - string
+# output: x_numbers - list of the single-digit integers contained in the string
+extract_nums = function(x, output){
+  x_numbers <- regmatches(x, gregexpr("[[:digit:]]+", x))
+  return(x_numbers)
+}
+
+# function to collapse list of integers into string
+# input: x - list of numbers
+# output: x_string - string of numbers
+collapse_nums = function(x, output){
+  x_string = paste(unlist(x),collapse="")
+  return(x_string)
+}
+
+# extract neighborhood number from string
+neigh_num <- lapply(resipfr_all[,2], extract_nums)
+neigh_num_str <- lapply(neigh_num, collapse_nums)
+resipfr_all$Neighborhood_Number <- neigh_num_str
+
+# remove rows with uncertain neighborhood (have multiple or no neighborhoods listed)
+resipfr_all_seg <- subset(resipfr_all, nchar(Neighborhood_Number) == 1)
+
+################################################################################
+# get age of resights based on year born (if born locally)
+resipfr_all_seg$Birth_Year = NA
+for(i in 1:length(resipfr_all_seg$PFR)){
+  present <- match(resipfr_all_seg$PFR[i], banded_pfr_all$PFR)
+  if(!is.na(present)){
+    resipfr_all_seg$Birth_Year[i] = banded_pfr_all$Year[present]
+  }
+}

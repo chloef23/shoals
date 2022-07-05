@@ -76,7 +76,7 @@ neigh_num <- apply(fledged_all[,2], 1, extract_nums)
 neigh_num_str <- lapply(neigh_num, collapse_nums)
 fledged_all$Neighborhood_Number <- neigh_num_str
 
-# remove rows with uncertain neighborhood (have multiple neighborhoods listed)
+# remove rows with uncertain neighborhood (have multiple or no neighborhoods listed)
 fledged_all_seg <- subset(fledged_all, nchar(Neighborhood_Number) == 1)
 
 # remove any rows where Notes say "exclude from productivity"
