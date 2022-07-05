@@ -158,5 +158,5 @@ graph_df$Mean <- as.numeric(graph_df$Mean)
 graph_df %>%                                           
   ggplot(aes(x=Neighborhood,y=Mean, color=Year)) +            
   geom_point() +                                     
-  labs(x="Neigborhood",y="Mean Productivity (% Fledged)",
+  labs(x="Neigborhood",y="% Fledged",
        fill="Year")
