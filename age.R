@@ -112,33 +112,33 @@ resi_2021 <- read_excel(RESIGHT_DATA, sheet="Resights 2021")
 # for each year, extract all resight PFRs and the neighborhood they were sighted at
 # note code is different for each year because data is in different format
 resipfr_2017 = resi_2017[resi_2017$"Aux type" == "PFR",]
-resipfr_2017 = resipfr_2017[c("Specific Location", "Aux code")]
+resipfr_2017 = resipfr_2017[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2017$Year = 2017
 
 resipfr_2018 = resi_2018[resi_2018$"Aux type" == "PFR",]
-resipfr_2018 = resipfr_2018[c("Specific Location", "Aux code")]
+resipfr_2018 = resipfr_2018[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2018$Year = 2018
 
 resipfr_2019 = resi_2019[resi_2019$"Aux type" == "PFR",]
-resipfr_2019 = resipfr_2019[c("Specific Location", "Aux code")]
+resipfr_2019 = resipfr_2019[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2019$Year = 2019
 
 resipfr_2020 = resi_2020[resi_2020$"Aux type" == "PFR",]
-resipfr_2020 = resipfr_2020[c("Specific Location", "Aux code")]
+resipfr_2020 = resipfr_2020[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2020$Year = 2020
 
 resipfr_2021 = resi_2021[resi_2021$"Aux type" == "PFR",]
-resipfr_2021 = resipfr_2021[c("Specific Location", "Aux code")]
+resipfr_2021 = resipfr_2021[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2021$Year = 2021
 
 resipfr_2022 = resi_2022[resi_2022$"Aux type" == "PFR",]
-resipfr_2022 = resipfr_2022[c("Specific Location", "Aux code")]
+resipfr_2022 = resipfr_2022[c("Specific Location", "Aux Color", "Aux code")]
 resipfr_2022$Year = 2022
 
 # combine all pfr ids into one data frame
 resipfr_all = as.data.frame(rbind(resipfr_2017, resipfr_2018, resipfr_2019, 
                                   resipfr_2020, resipfr_2021, resipfr_2022))
-colnames(resipfr_all) = c("Neighborhood", "PFR", "Year")
+colnames(resipfr_all) = c("Neighborhood", "Color", "PFR", "Year")
 resipfr_all <- resipfr_all %>% relocate("Year")
 
 # function to extract numbers from string
@@ -165,14 +165,20 @@ resipfr_all$Neighborhood_Number <- neigh_num_str
 # remove rows with uncertain neighborhood (have multiple or no neighborhoods listed)
 resipfr_all_seg <- subset(resipfr_all, nchar(Neighborhood_Number) == 1)
 
+# remove all rows with uncertain PFR (length of PFR != 3 char)
+resipfr_all_seg <- subset(resipfr_all_seg, nchar(PFR) == 3)
+
+# lowercase band color
+resipfr_all_seg$Color <- lapply(resipfr_all_seg$Color, tolower)
+
 ################################################################################
 # get age of resights based on year born (if born locally)
 resipfr_all_seg$Birth_Year = NA
 resipfr_all_seg$Natal_Neighborhood = NA
 resipfr_all_seg$Born_Locally = FALSE
-for(i in 1:length(resipfr_all_seg$PFR)){
+for(i in 1:length(resipfr_all_seg$PFR)){  # for all resights, see if born on Seavey
   present <- match(resipfr_all_seg$PFR[i], banded_pfr_all_seg$PFR)
-  if(!is.na(present)){
+  if(!is.na(present)){  # if born and banded on Seavey, get neighborhood information
     resipfr_all_seg$Birth_Year[i] = banded_pfr_all_seg$`Year Born`[present]
     resipfr_all_seg$Natal_Neighborhood[i] = 
       banded_pfr_all_seg$Natal_Neighborhood_Number[present]
@@ -191,19 +197,27 @@ extract_year = function(x, output){
 
 # extract age, year banded, PFR and code
 all_banding_data <- read_excel(ALL_BANDING_DATA)
-immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_date", "MFR or PFR", "Code")]
+immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_date", "MFR or PFR", "Color", "Code")]
 immigrant_resi = immigrant_resi[immigrant_resi$`MFR or PFR` == "PFR",]
 immigrant_resi = immigrant_resi[immigrant_resi$AGE_CODE == 4,]    # might change
 immigrant_resi$Banding_date = lapply(immigrant_resi$Banding_date, extract_year)
-immigrant_resi_seg = immigrant_resi[c("Banding_date", "Code")]
-colnames(immigrant_resi_seg) = c("Birth_Year", "PFR")
+immigrant_resi$Color <- lapply(immigrant_resi$Color, tolower)
+immigrant_resi_seg = immigrant_resi[c("Banding_date", "Color", "Code")]
+colnames(immigrant_resi_seg) = c("Birth_Year", "Band_Color", "PFR")
 
 # get age of resights based on year born (if not local)
 for(i in 1:length(resipfr_all_seg$PFR)){
   if(!resipfr_all_seg$Born_Locally[i]){  # if tern not born locally
     present <- match(resipfr_all_seg$PFR[i], immigrant_resi_seg$PFR)
-    if(!is.na(present)){
+    if(!is.na(present) # if bird banded and recorded and if band colors match 
+       & (as.character(resipfr_all_seg$Color[i]) == 
+          as.character(immigrant_resi_seg$Band_Color[present]))){
       resipfr_all_seg$Birth_Year[i] = immigrant_resi_seg$Birth_Year[present]
     }
   }
 }
+
+# clean up dataframe
+resights_all = resipfr_all_seg[c("Year", "Neighborhood_Number", "Birth_Year",
+                                 "Natal_Neighborhood", "Born_Locally")]
+resights_all = resights_all[!is.na(resights_all$Birth_Year),]
