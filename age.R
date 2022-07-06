@@ -179,3 +179,8 @@ for(i in 1:length(resipfr_all_seg$PFR)){
 
 ################################################################################
 # get age of resights based on year born (if born elsewhere)
+# this code will take longer to execute since the data set is large
+
+# extract age, year banded, PFR and code
+all_banding_data <- read_excel(ALL_BANDING_DATA)
+immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_year", "MFR or PFR", "Code")]
