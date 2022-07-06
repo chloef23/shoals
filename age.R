@@ -8,6 +8,9 @@
     # if not in Seavey data, look in big dataset
 # get median age of adult terns by neighborhood
 
+# TODO: why are there so few returners compared to Liz's numbers? talk to Liz
+#      about how she got her numbers, look at excluded birds
+
 # replace these with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
@@ -181,6 +184,26 @@ for(i in 1:length(resipfr_all_seg$PFR)){
 # get age of resights based on year born (if born elsewhere)
 # this code will take longer to execute since the data set is large
 
+# function to get first four char from string
+extract_year = function(x, output){
+  return(substring(x, 0, 4))
+}
+
 # extract age, year banded, PFR and code
 all_banding_data <- read_excel(ALL_BANDING_DATA)
-immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_year", "MFR or PFR", "Code")]
+immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_date", "MFR or PFR", "Code")]
+immigrant_resi = immigrant_resi[immigrant_resi$`MFR or PFR` == "PFR",]
+immigrant_resi = immigrant_resi[immigrant_resi$AGE_CODE == 4,]    # might change
+immigrant_resi$Banding_date = lapply(immigrant_resi$Banding_date, extract_year)
+immigrant_resi_seg = immigrant_resi[c("Banding_date", "Code")]
+colnames(immigrant_resi_seg) = c("Birth_Year", "PFR")
+
+# get age of resights based on year born (if not local)
+for(i in 1:length(resipfr_all_seg$PFR)){
+  if(!resipfr_all_seg$Born_Locally[i]){  # if tern not born locally
+    present <- match(resipfr_all_seg$PFR[i], immigrant_resi_seg$PFR)
+    if(!is.na(present)){
+      resipfr_all_seg$Birth_Year[i] = immigrant_resi_seg$Birth_Year[present]
+    }
+  }
+}
