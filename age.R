@@ -208,16 +208,65 @@ colnames(immigrant_resi_seg) = c("Birth_Year", "Band_Color", "PFR")
 # get age of resights based on year born (if not local)
 for(i in 1:length(resipfr_all_seg$PFR)){
   if(!resipfr_all_seg$Born_Locally[i]){  # if tern not born locally
-    present <- match(resipfr_all_seg$PFR[i], immigrant_resi_seg$PFR)
-    if(!is.na(present) # if bird banded and recorded and if band colors match 
-       & (as.character(resipfr_all_seg$Color[i]) == 
-          as.character(immigrant_resi_seg$Band_Color[present]))){
-      resipfr_all_seg$Birth_Year[i] = immigrant_resi_seg$Birth_Year[present]
+    present <- which(immigrant_resi_seg$PFR %in% resipfr_all_seg$PFR[i])
+    if(length(present) != 0){ # if bird banded and recorded
+       for(j in present){ # for all indicies that match the band number, check color 
+         if(as.character(resipfr_all_seg$Color[i]) == 
+            as.character(immigrant_resi_seg$Band_Color[j])){
+            resipfr_all_seg$Birth_Year[i] = immigrant_resi_seg$Birth_Year[j]
+         }
+       }
     }
   }
 }
+
+# TODO: export dataframe of all resights and their birth year, location
 
 # clean up dataframe
 resights_all = resipfr_all_seg[c("Year", "Neighborhood_Number", "Birth_Year",
                                  "Natal_Neighborhood", "Born_Locally")]
 resights_all = resights_all[!is.na(resights_all$Birth_Year),]
+
+################################################################################
+# create graphs of data
+
+# get local terns that did and did not return to their natal neighborhood
+resights_all$Returned_Natal = NA
+resights_all$Neighborhood_Number = as.numeric(resights_all$Neighborhood_Number)
+
+for(i in 1:length(resights_all$Returned_Natal)){
+  if(!is.na(resights_all$Natal_Neighborhood[i])){ # if the tern was born locally
+    if(resights_all$Natal_Neighborhood[i] == resights_all$Neighborhood_Number[i]){
+      resights_all$Returned_Natal[i] = TRUE   # tern returned to natal neighborhood
+    }
+    else{
+      resights_all$Returned_Natal[i] = FALSE  # tern did not return to natal neighborhood
+    }
+  }
+}
+
+# get age of terns
+resights_all$Birth_Year = as.numeric(resights_all$Birth_Year)
+for(i in 1:length(resights_all$Tern_Age)){
+  resights_all$Tern_Age[i] = resights_all$Year[i] - resights_all$Birth_Year[i]
+}
+
+# create histogram of age distribution
+hist(resights_all$Tern_Age)
+
+# exclude terns that were resighted in the same year they were born
+resights_all = resights_all[resights_all$Tern_Age != 0,]
+
+# plot tern age by neighborhood
+resights_all$Neighborhood_Number = as.factor(resights_all$Neighborhood_Number)
+resights_all %>%                                           
+  ggplot(aes(x=Neighborhood_Number,y=Tern_Age)) +            
+  geom_boxplot() +                                     
+  labs(x="Neigborhood",y="Tern Age")
+
+# plot returning terns by neighborhood
+resights_all %>%                                           
+  ggplot(aes()) +
+  geom_bar() + 
+  facet_grid(. ~g) +                                    
+  labs(x="Neigborhood",y="Tern Age")
