@@ -199,7 +199,7 @@ extract_year = function(x, output){
 all_banding_data <- read_excel(ALL_BANDING_DATA)
 immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_date", "MFR or PFR", "Color", "Code")]
 immigrant_resi = immigrant_resi[immigrant_resi$`MFR or PFR` == "PFR",]
-immigrant_resi = immigrant_resi[immigrant_resi$AGE_CODE == 4,]    # might change
+immigrant_resi = immigrant_resi[immigrant_resi$AGE_CODE == 4,]    # hatched that year
 immigrant_resi$Banding_date = lapply(immigrant_resi$Banding_date, extract_year)
 immigrant_resi$Color <- lapply(immigrant_resi$Color, tolower)
 immigrant_resi_seg = immigrant_resi[c("Banding_date", "Color", "Code")]
@@ -248,6 +248,7 @@ for(i in 1:length(resights_all$Returned_Natal)){
 # get age of terns
 resights_all$Birth_Year = as.numeric(resights_all$Birth_Year)
 for(i in 1:length(resights_all$Tern_Age)){
+  print(resights_all$Tern_Age[i])
   resights_all$Tern_Age[i] = resights_all$Year[i] - resights_all$Birth_Year[i]
 }
 
@@ -265,8 +266,11 @@ resights_all %>%
   labs(x="Neigborhood",y="Tern Age")
 
 # plot returning terns by neighborhood
-resights_all %>%                                           
-  ggplot(aes()) +
+only_natal = resights_all[!is.na(resights_all$Natal_Neighborhood),]
+only_natal$Natal_Neighborhood = as.numeric(only_natal$Natal_Neighborhood)
+only_natal$Natal_Neighborhood = as.factor(only_natal$Natal_Neighborhood)
+only_natal %>%                                           
+  ggplot(aes(Returned_Natal)) +
   geom_bar() + 
-  facet_grid(. ~g) +                                    
-  labs(x="Neigborhood",y="Tern Age")
+  facet_grid(. ~Natal_Neighborhood) +                                    
+  labs(x="Neigborhood",y="Number of Natal Terns Returning")
