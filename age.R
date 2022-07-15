@@ -18,6 +18,9 @@ PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-20
 RESIGHT_DATA = "C:/Users/sapph/Downloads/ROST resight raw data 2016-2022.xlsx"
 ALL_BANDING_DATA = "C:/Users/sapph/Downloads/ROST all PFR and MFR records from BBL proofed 6-21-21 out for review.xlsx"
 
+# path for excel file of all White and Seavey Island resights and their age and birth location
+EXPORT_EXCEL = "C:/Users/sapph/OneDrive/Documents/R/Shoals//ROST_Resight_Data.xlsx"
+
 # import packages
 library(readxl)
 library(dplyr)
@@ -204,34 +207,66 @@ extract_year = function(x, output){
 
 # extract age, year banded, PFR and code
 all_banding_data <- read_excel(ALL_BANDING_DATA)
-immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_date", "MFR or PFR", "Color", "Code")]
+immigrant_resi = all_banding_data[c("AGE_CODE", "Banding_location", "Banding_state",
+                                    "Banding_date", "MFR or PFR","Color", "Code")]
 immigrant_resi = immigrant_resi[immigrant_resi$AGE_CODE == 4,]    # hatched that year
 immigrant_resi$Banding_date = lapply(immigrant_resi$Banding_date, extract_year)
 immigrant_resi$Color <- lapply(immigrant_resi$Color, tolower)
-immigrant_resi_seg = immigrant_resi[c("Banding_date", "MFR or PFR", "Color", "Code")]
-colnames(immigrant_resi_seg) = c("Birth_Year","Band_Type", "Band_Color", "Code")
+immigrant_resi_seg = immigrant_resi[c("Banding_location", "Banding_state", "Banding_date",
+                                      "MFR or PFR", "Color", "Code")]
+colnames(immigrant_resi_seg) = c("Birth_Colony", "Birth_State", "Birth_Year","Band_Type", 
+                                 "Band_Color", "Code")
 
-# get age of resights based on year born (if not local)
-for(i in 1:length(resipfr_all_seg$PFR)){
-  if(!resipfr_all_seg$Natal_Known[i]){  # if tern not born locally
-    present <- which(immigrant_resi_seg$PFR %in% resipfr_all_seg$PFR[i])
-    if(length(present) != 0){ # if bird banded and recorded
-       for(j in present){ # for all indicies that match the band number, check color 
-         if(as.character(resipfr_all_seg$Color[i]) == 
-            as.character(immigrant_resi_seg$Band_Color[j])){
-            resipfr_all_seg$Birth_Year[i] = immigrant_resi_seg$Birth_Year[j]
+# assign correct birth colony and state to local birds
+resipfr_all_seg$Birth_Colony = NA
+resipfr_all_seg$Birth_State = NA
+
+resipfr_all_seg$Birth_Colony[resipfr_all_seg$Natal_Known == 'TRUE'] <- "White and Seavey Islands"
+resipfr_all_seg$Birth_State[resipfr_all_seg$Natal_Known == 'TRUE'] <- "New Hampshire"
+
+# match PFRs and MFRs to tern database for all terns not already matched
+pfr_only = immigrant_resi_seg[immigrant_resi_seg$Band_Type == "PFR",]
+mfr_only = immigrant_resi_seg[immigrant_resi_seg$Band_Type == "MFR",]
+for(i in 1:nrow(resipfr_all_seg)){
+  if(!resipfr_all_seg$Natal_Known[i]){  # if tern not already matched
+    if(resipfr_all_seg$`PFR or MFR`[i] == "PFR"){
+      present <- which(pfr_only$Code %in% resipfr_all_seg$Code[i])
+      if(length(present) != 0){ # if bird banded and recorded
+         for(j in present){ # for all indicies that match the band number, check color
+           if(as.character(resipfr_all_seg$Color[i]) ==
+              as.character(pfr_only$Band_Color[j])){
+             resipfr_all_seg$Birth_Year[i] = pfr_only$Birth_Year[j]
+             resipfr_all_seg$Birth_Colony[i] = pfr_only$Birth_Colony[j]
+             resipfr_all_seg$Birth_State[i] = pfr_only$Birth_State[j]
+           }
          }
-       }
+      }
+    }
+    else if(resipfr_all_seg$`PFR or MFR`[i] == "MFR"){
+      present <- which(mfr_only$Code %in% resipfr_all_seg$Code[i])
+      if(length(present) == 1){ # if bird banded and recorded
+        resipfr_all_seg$Birth_Year[i] = mfr_only$Birth_Year[present]
+        resipfr_all_seg$Birth_Colony[i] = mfr_only$Birth_Colony[present]
+        resipfr_all_seg$Birth_State[i] = mfr_only$Birth_State[present]
+      }
     }
   }
 }
 
-# TODO: export dataframe of all resights and their birth year, location
+# export dataframe of all resights and their birth year, location
+library("writexl")
+
+for_export = resipfr_all_seg[c("Year", "Neighborhood", "Color", "PFR or MFR", 
+                               "Code","Birth_Year","Birth_Colony", "Birth_State")]
+for_export$Color = as.character(for_export$Color)
+for_export$Birth_Year = as.numeric(for_export$Birth_Year)
+write_xlsx(for_export,EXPORT_EXCEL)
 
 # clean up dataframe
-resights_all = resipfr_all_seg[c("Year", "Neighborhood_Number", "Birth_Year",
-                                 "Natal_Neighborhood", "Born_Locally")]
+resights_all = resipfr_all_seg[c("Year", "Code", "Neighborhood_Number", "Birth_Year",
+                                 "Natal_Neighborhood", "Birth_Colony", "Birth_State")]
 resights_all = resights_all[!is.na(resights_all$Birth_Year),]
+resights_all = unique(resights_all)
 
 ################################################################################
 # create graphs of data
