@@ -1,15 +1,6 @@
-# Chloe Fugle
+# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
 # Shoals Marine Laboratory Internship, 7/4/2022
 # Get mean age of Roseate Terns by neighborhood
-
-# make list of Roseate Tern field readable of chicks by year
-# make list of resights and their neighborhood by year
-# get age of resights based on year born
-    # if not in Seavey data, look in big dataset
-# get median age of adult terns by neighborhood
-
-# TODO: why are there so few returners compared to Liz's numbers? talk to Liz
-#      about how she got her numbers, look at excluded birds
 
 # replace these with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
@@ -112,6 +103,7 @@ resi_2018 <- read_excel(RESIGHT_DATA, sheet="Resights 2018")
 resi_2019 <- read_excel(RESIGHT_DATA, sheet="Resights 2019")
 resi_2020 <- read_excel(RESIGHT_DATA, sheet="Resights 2020")
 resi_2021 <- read_excel(RESIGHT_DATA, sheet="Resights 2021")
+resi_2022 <- read_excel(RESIGHT_DATA, sheet="Resights 2022")
 
 # for each year, extract all resight PFRs and the neighborhood they were sighted at
 # note code is different for each year because data is in different format
@@ -288,8 +280,7 @@ for(i in 1:length(resights_all$Returned_Natal)){
 
 # get age of terns
 resights_all$Birth_Year = as.numeric(resights_all$Birth_Year)
-for(i in 1:length(resights_all$Tern_Age)){
-  print(resights_all$Tern_Age[i])
+for(i in 1:nrow(resights_all)){
   resights_all$Tern_Age[i] = resights_all$Year[i] - resights_all$Birth_Year[i]
 }
 
@@ -299,6 +290,8 @@ hist(resights_all$Tern_Age)
 # exclude terns that were resighted in the same year they were born
 resights_all = resights_all[resights_all$Tern_Age != 0,]
 
+# TODO: create histogram of resight distribution by neighborhood
+
 # plot tern age by neighborhood
 resights_all$Neighborhood_Number = as.factor(resights_all$Neighborhood_Number)
 resights_all %>%                                           
@@ -307,6 +300,7 @@ resights_all %>%
   labs(x="Neigborhood",y="Tern Age")
 
 # plot returning terns by neighborhood
+# TODO: this double counts birds that return to same neighborhood every year
 only_natal = resights_all[!is.na(resights_all$Natal_Neighborhood),]
 only_natal$Natal_Neighborhood = as.numeric(only_natal$Natal_Neighborhood)
 only_natal$Natal_Neighborhood = as.factor(only_natal$Natal_Neighborhood)

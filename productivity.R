@@ -1,4 +1,4 @@
-# Chloe Fugle
+# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
 # Shoals Marine Laboratory Internship, 7/3/2022
 # Get productivity distribution of Roseate Terns from 2017-2021
 
