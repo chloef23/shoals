@@ -290,7 +290,13 @@ hist(resights_all$Tern_Age)
 # exclude terns that were resighted in the same year they were born
 resights_all = resights_all[resights_all$Tern_Age != 0,]
 
-# TODO: create histogram of resight distribution by neighborhood
+# create histogram of resight distribution by neighborhood
+plot(resights_all$Neighborhood_Number)
+
+# perform one-way ANOVA modeling tern age as a function of neighborhood
+anova = aov(Tern_Age ~ Neighborhood_Number, data = resights_all)
+plot(anova)   # check for homoscedasticity
+tukey = TukeyHSD(anova)   # perform Tukey HSD Pst-Hoc test
 
 # plot tern age by neighborhood
 resights_all$Neighborhood_Number = as.factor(resights_all$Neighborhood_Number)

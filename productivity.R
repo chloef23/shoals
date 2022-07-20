@@ -2,6 +2,9 @@
 # Shoals Marine Laboratory Internship, 7/3/2022
 # Get productivity distribution of Roseate Terns from 2017-2021
 
+# replace this with the path to your data on your computer
+# note: if you copy-paste the path on a Windows computer, it will have "\" in 
+#       the path - please replace all "\" with "/" for R to interpret it correctly
 PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-2021.xlsx"
 
 # import packages
@@ -113,6 +116,10 @@ alive <- apply(fledged_all_seg[,4], 1, check_alive)
 alive <- lapply(alive, as.numeric)
 fledged_all_seg$Fledged_Bool <- alive
 
+# clean up data frame
+productivity_all = fledged_all_seg[c("Year", "Neighborhood_Number", "Fledged_Bool")]
+colnames(productivity_all) = c("Year", "Neighborhood", "Fledged")
+
 ################################################################################
 # make scatter plot of mean productivity by neighborhood by year
 
@@ -124,6 +131,9 @@ for(i in 2017:2021){
                               [fledged_all_seg$Year == i]), na.rm = TRUE)
   year_means_list = c(year_means_list, temp_mean)
 }
+
+# export mean productivity by neighborhood
+saveRDS(year_means_list, file="Mean_Productivity_by_Year")
 
 # get mean productivity by neighborhood
 neigh_means_list = list()
@@ -150,13 +160,21 @@ for(i in 2017:2021){
   }
 }
 
+year_neigh_df = as.data.frame(cbind(year_list, neigh_list, neigh_year_means_list))
+colnames(year_neigh_df) = c("Year", "Neighborhood", "Mean_Percent_Fledged")
+year_neigh_df <- as.data.frame(lapply(year_neigh_df, unlist))
+
+# perform one-way ANOVA modeling %fledged as a function of neighborhood
+anova = aov(Mean_Percent_Fledged ~ Neighborhood, data = year_neigh_df)
+
 # combine year, neighborhood, means to form data frame
 graph_df = as.data.frame(cbind(Year = year_list, Neighborhood = neigh_list, 
                                Mean = neigh_year_means_list))
-graph_df$Neighborhood <- as.numeric(graph_df$Neighborhood)
+graph_df <- as.data.frame(lapply(graph_df, unlist))
+graph_df$Neighborhood <- as.factor(graph_df$Neighborhood)
 graph_df$Mean <- as.numeric(graph_df$Mean)
 graph_df %>%                                           
   ggplot(aes(x=Neighborhood,y=Mean, color=Year)) +            
-  geom_point() +                                     
+  geom_boxplot() +                                     
   labs(x="Neigborhood",y="% Fledged",
        fill="Year")
