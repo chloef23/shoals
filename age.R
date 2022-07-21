@@ -293,6 +293,10 @@ resights_all = resights_all[resights_all$Tern_Age != 0,]
 # create histogram of resight distribution by neighborhood
 plot(resights_all$Neighborhood_Number)
 
+# export year, neighborhood, and ROST code for each resighted tern
+for_export = resights_all[c("Year", "Code", "Neighborhood_Number")]
+saveRDS(for_export, file="Resights by Neighborhood and Year")
+
 # perform one-way ANOVA modeling tern age as a function of neighborhood
 anova = aov(Tern_Age ~ Neighborhood_Number, data = resights_all)
 plot(anova)   # check for homoscedasticity
@@ -304,6 +308,23 @@ resights_all %>%
   ggplot(aes(x=Neighborhood_Number,y=Tern_Age)) +            
   geom_boxplot() +                                     
   labs(x="Neigborhood",y="Tern Age")
+
+# plot birth place of terns by neighborhood
+resights_all = as.data.frame(lapply(resights_all, unlist))
+resights_all$Birth_State = as.factor(resights_all$Birth_State)
+resights_all$Neighborhood_Number = as.factor(resights_all$Neighborhood_Number)
+
+resights_percent <- resights_all %>%
+  count(Birth_Colony, Neighborhood_Number) %>%
+  group_by(Neighborhood_Number) %>%
+  mutate(percent = (n / sum(n)) * 100) %>%
+  ungroup()
+
+resights_percent %>%                                           
+  ggplot(aes(x = Neighborhood_Number, y = percent, fill = Birth_Colony)) +            
+  geom_bar(stat = "identity") + 
+  scale_fill_brewer(palette="Set3")  +
+  labs(x="Neigborhood",y="Percent of Terns")
 
 # plot returning terns by neighborhood
 # TODO: this double counts birds that return to same neighborhood every year

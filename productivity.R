@@ -132,9 +132,6 @@ for(i in 2017:2021){
   year_means_list = c(year_means_list, temp_mean)
 }
 
-# export mean productivity by neighborhood
-saveRDS(year_means_list, file="Mean_Productivity_by_Year")
-
 # get mean productivity by neighborhood
 neigh_means_list = list()
 for(i in 1:9){
@@ -164,6 +161,10 @@ year_neigh_df = as.data.frame(cbind(year_list, neigh_list, neigh_year_means_list
 colnames(year_neigh_df) = c("Year", "Neighborhood", "Mean_Percent_Fledged")
 year_neigh_df <- as.data.frame(lapply(year_neigh_df, unlist))
 
+# export mean productivity by neighborhood, by neighborhood by year
+saveRDS(year_means_list, file="Mean_Productivity_by_Year")
+saveRDS(neigh_year_means_list, file="Mean_Productivity_by_Year_by_Neighborhood")
+
 # perform one-way ANOVA modeling %fledged as a function of neighborhood
 anova = aov(Mean_Percent_Fledged ~ Neighborhood, data = year_neigh_df)
 
@@ -174,7 +175,6 @@ graph_df <- as.data.frame(lapply(graph_df, unlist))
 graph_df$Neighborhood <- as.factor(graph_df$Neighborhood)
 graph_df$Mean <- as.numeric(graph_df$Mean)
 graph_df %>%                                           
-  ggplot(aes(x=Neighborhood,y=Mean, color=Year)) +            
+  ggplot(aes(x=Neighborhood,y=Mean)) +            
   geom_boxplot() +                                     
-  labs(x="Neigborhood",y="% Fledged",
-       fill="Year")
+  labs(x="Neigborhood",y="% Fledged")
