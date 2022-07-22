@@ -108,6 +108,9 @@ check_alive = function(x, output){
   else if(grepl("fledged", x)){
     x_num = 1
   }
+  else{
+    x_num = NA
+  }
 }
 
 # assign 1 for fledged chicks, 0 for dead chicks or abandoned eggs, and NA

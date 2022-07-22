@@ -16,6 +16,7 @@ EXPORT_EXCEL = "C:/Users/sapph/OneDrive/Documents/R/Shoals//ROST_Resight_Data.xl
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(RColorBrewer)
 
 ################################################################################
 # make list of Roseate Tern field readable bands of chicks by year
