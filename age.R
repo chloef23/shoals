@@ -327,13 +327,36 @@ resights_percent %>%
   scale_fill_brewer(palette="Set3")  +
   labs(x="Neigborhood",y="Percent of Terns")
 
+# plot percent local terns in each neighborhood against percent fledged
+mean_prod = readRDS(file="Mean_Productivity_by_Neighborhood")
+percent_local = resights_percent[resights_percent$Birth_Colony == "White and Seavey Islands",]
+percent_local = rbind(percent_local, c("White and Seavey Island", 7, 0, 0))
+percent_local$Percent_Fledged = mean_prod
+colnames(percent_local) = c("Birth_Colony", "Neighborhood_Number", "N", "Percent_Local", "Percent_Fledged")
+
+percent_local$Percent_Fledged = as.numeric(percent_local$Percent_Fledged)
+percent_local$Percent_Local = as.numeric(percent_local$Percent_Local)
+percent_local %>%                                           
+  ggplot(aes(x = Percent_Local, y = Percent_Fledged)) +
+  geom_point()  +                                   
+  labs(x="% Local Terns",y="% Fledged")
+
 # plot returning terns by neighborhood
-# TODO: this double counts birds that return to same neighborhood every year
+# don't double count birds that return to same neighborhood every year
 only_natal = resights_all[!is.na(resights_all$Natal_Neighborhood),]
-only_natal$Natal_Neighborhood = as.numeric(only_natal$Natal_Neighborhood)
-only_natal$Natal_Neighborhood = as.factor(only_natal$Natal_Neighborhood)
-only_natal %>%                                           
+natal_graph_df = data.frame()
+for(j in 1:9){
+  temp_data = only_natal[only_natal$Natal_Neighborhood == j,]
+  temp_data = temp_data[!duplicated(c(temp_data$Code, temp_data$Returned_Natal)),]
+  temp_data = temp_data[complete.cases(temp_data),]
+  natal_graph_df = as.data.frame(rbind(natal_graph_df, temp_data))
+}
+
+# plot returning terns by neighborhood
+natal_graph_df$Natal_Neighborhood = as.numeric(natal_graph_df$Natal_Neighborhood)
+natal_graph_df$Natal_Neighborhood = as.factor(natal_graph_df$Natal_Neighborhood)
+natal_graph_df %>%                                           
   ggplot(aes(Returned_Natal)) +
   geom_bar() + 
   facet_grid(. ~Natal_Neighborhood) +                                    
-  labs(x="Neigborhood",y="Number of Natal Terns Returning")
+  labs(x="Natal Neigborhood",y="Number of Natal Terns Returning")

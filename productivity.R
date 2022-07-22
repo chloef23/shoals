@@ -166,6 +166,7 @@ year_neigh_df <- as.data.frame(lapply(year_neigh_df, unlist))
 
 # export mean productivity by neighborhood, by neighborhood by year
 saveRDS(year_means_list, file="Mean_Productivity_by_Year")
+saveRDS(neigh_means_list, file="Mean_Productivity_by_Neighborhood")
 saveRDS(neigh_year_means_list, file="Mean_Productivity_by_Year_by_Neighborhood")
 
 # perform one-way ANOVA modeling %fledged as a function of neighborhood
