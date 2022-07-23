@@ -321,9 +321,14 @@ resights_percent <- resights_all %>%
   mutate(percent = (n / sum(n)) * 100) %>%
   ungroup()
 
+df_sum <- resights_percent %>% 
+  group_by(Neighborhood_Number) %>% 
+  summarise(sum = sum(n))
+
 resights_percent %>%                                           
-  ggplot(aes(x = Neighborhood_Number, y = percent, fill = Birth_Colony)) +            
-  geom_bar(stat = "identity") + 
+  ggplot(aes(x = Neighborhood_Number, y = percent)) +            
+  geom_bar(stat = "identity", aes(fill = Birth_Colony)) + 
+  geom_text(data = df_sum, aes(label = sum, y = 100), vjust = -.25) +
   scale_fill_brewer(palette="Set3")  +
   labs(x="Neigborhood",y="Percent of Terns")
 
@@ -341,8 +346,11 @@ percent_local %>%
   geom_point()  +                                   
   labs(x="% Local Terns",y="% Fledged")
 
+# perform one-way ANOVA modeling birth place as a function of neighborhood
+# anova = aov(Percent_Local ~ Neighborhood_Number, data = percent_local)
+
 # plot returning terns by neighborhood
-# don't double count birds that return to same neighborhood every year
+# does not double count birds that return to same neighborhood every year
 only_natal = resights_all[!is.na(resights_all$Natal_Neighborhood),]
 natal_graph_df = data.frame()
 for(j in 1:9){
