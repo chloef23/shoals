@@ -307,7 +307,7 @@ tukey = TukeyHSD(anova)   # perform Tukey HSD Pst-Hoc test
 resights_all$Neighborhood_Number = as.factor(resights_all$Neighborhood_Number)
 resights_all %>%                                           
   ggplot(aes(x=Neighborhood_Number,y=Tern_Age)) +            
-  geom_boxplot() +                                     
+  geom_boxplot(fill='slategray1', color="black", alpha = 0.8) +                                     
   labs(x="Neigborhood",y="Tern Age")
 
 # plot birth place of terns by neighborhood
@@ -330,7 +330,7 @@ resights_percent %>%
   geom_bar(stat = "identity", aes(fill = Birth_Colony)) + 
   geom_text(data = df_sum, aes(label = sum, y = 100), vjust = -.25) +
   scale_fill_brewer(palette="Set3")  +
-  labs(x="Neigborhood",y="Percent of Terns")
+  labs(x="Neigborhood",y="Percent of Terns", fill="Birth Colony")
 
 # plot percent local terns in each neighborhood against percent fledged
 mean_prod = readRDS(file="Mean_Productivity_by_Neighborhood")
@@ -365,6 +365,7 @@ natal_graph_df$Natal_Neighborhood = as.numeric(natal_graph_df$Natal_Neighborhood
 natal_graph_df$Natal_Neighborhood = as.factor(natal_graph_df$Natal_Neighborhood)
 natal_graph_df %>%                                           
   ggplot(aes(Returned_Natal)) +
-  geom_bar() + 
+  geom_bar(aes(fill = Returned_Natal)) + 
   facet_grid(. ~Natal_Neighborhood) +                                    
-  labs(x="Natal Neigborhood",y="Number of Natal Terns Returning")
+  labs(x="Natal Neigborhood",y="Number of Terns",
+       fill = "Returned to\nNatal Neighborhood")

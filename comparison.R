@@ -118,7 +118,6 @@ comp_all$Fledged_Bool <- alive
 comp_all_seg = comp_all[c("Nest_Only_Number", "Year", "Neighborhood_Number", "Fledged_Bool")]
 comp_all_seg <- comp_all_seg %>% relocate("Neighborhood_Number")
 comp_all_seg <- comp_all_seg %>% relocate("Year")
-comp_all_seg = unique(comp_all_seg)
 colnames(comp_all_seg) = c("Year", "Neighborhood", "Nest", "Fledged")
 
 ################################################################################
@@ -139,7 +138,11 @@ for(i in 2017:2021){
       next
     }
     nests_seg = as.data.frame(lapply(nests_seg, unlist))
-    nests_seg = nests_seg[complete.cases(nests_seg),]
+    remove = nests_seg[which(is.na(nests_seg$Fledged)),"Nest"]  # list of nests that contain an NA
+    if(length(remove) > 0){
+      remove = as.list(remove)
+      nests_seg = subset(nests_seg, !(Nest %in% remove))   # remove nests with NAs
+    }
     no_nests = length(unique(nests_seg$Nest)) # get number of nests in neighborhood that year
     total_fledged = sum(nests_seg$Fledged)
     
@@ -162,9 +165,43 @@ prod_by_neighyear = readRDS(file="Mean_Productivity_by_Year_by_Neighborhood")
 productivity_df$Percent_Fledged = prod_by_neighyear
 
 # plot percent fledged against number of nests in a neighborhood
-productivity_df$Percent_Fledged = as.numeric(productivity_df$Percent_Fledged)
+productivity_df$Percent_Fledged = as.numeric(productivity_df$Percent_Fledged, na.rm = TRUE)
 productivity_df %>%                                           
   ggplot(aes(x=Productivity,y=Percent_Fledged)) +            
   geom_point() + 
-  geom_abline(slope=1,intercept=0)  +
+  geom_abline(slope=1,intercept=0, color="red4")  +
+  scale_x_continuous(expand = c(0, 0), limits = c(-0.05, 1.65)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(-0.05, 1.05))  +
   labs(x="Productivity (Fledged/Nest)",y="% Fledged (No. Fledged/No. Eggs)")
+
+################################################################################
+# get productivity by year
+year = vector(mode = "list", length = 0)
+productivity = vector(mode = "list", length = 0)
+
+for(i in 2017:2021){
+  year_seg = comp_all_seg[comp_all_seg$Year == i,]
+  if(nrow(year_seg) == 0){
+    # add to data frame
+    year = c(year, i)
+    productivity = c(productivity, NA)
+    next
+  }
+  year_seg = as.data.frame(lapply(year_seg, unlist))
+  remove = year_seg[which(is.na(year_seg$Fledged)),"Nest"]  # list of nests that contain an NA
+  if(length(remove) > 0){
+    remove = as.list(remove)
+    year_seg = subset(year_seg, !(Nest %in% remove))   # remove nests with NAs
+  }
+  no_nests = length(unique(year_seg$Nest)) # get number of nests in neighborhood that year
+  total_fledged = sum(year_seg$Fledged)
+  
+  # add to data frame
+  year = c(year, i)
+  neighborhood = c(neighborhood, j)
+  productivity = c(productivity, total_fledged/no_nests)
+}
+
+year_productivity_df = as.data.frame(cbind(year, productivity))
+year_productivity_df = as.data.frame(lapply(year_productivity_df, unlist))
+colnames(year_productivity_df) = c("Year", "Productivity")

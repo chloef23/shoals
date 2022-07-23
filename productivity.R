@@ -180,5 +180,5 @@ graph_df$Neighborhood <- as.factor(graph_df$Neighborhood)
 graph_df$Mean <- as.numeric(graph_df$Mean)
 graph_df %>%                                           
   ggplot(aes(x=Neighborhood,y=Mean)) +            
-  geom_boxplot() +                                     
+  geom_boxplot(fill='slategray1', color="black", alpha = 0.8) +                                     
   labs(x="Neigborhood",y="% Fledged")

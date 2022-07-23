@@ -155,10 +155,9 @@ nests_number$Number_of_Resights = resights_number$Number_of_Resights
 # plot number of resights by number of nests
 nests_number$Number_of_Resights = as.numeric(nests_number$Number_of_Resights)
 nests_number %>%                                           
-  ggplot(aes(x=Number_of_Nests,y=Number_of_Resights, color=Neighborhood)) +            
+  ggplot(aes(x=Number_of_Nests,y=Number_of_Resights)) +            
   geom_point() +   
-  # geom_abline(intercept=0,slope=1) +
-  scale_color_brewer(palette="Paired") +
+  geom_abline(intercept=0,slope=1, color="red4") +
   labs(x="Number of Nests in Neigborhood",y="Number of Resights")
 
 # plot resights in each neighborhood/number of nests in each neighborhood x2
@@ -170,5 +169,5 @@ resights_nests$Percent_Resight = resights_nests$Number_of_Resights/
 resights_nests$Percent_Resight = as.numeric(resights_nests$Percent_Resight)
 resights_nests %>%                                           
   ggplot(aes(x=Neighborhood,y=Percent_Resight)) +            
-  geom_boxplot() + 
-  labs(x="Neigborhood",y="Number of Resights / Number of Birds")
+  geom_boxplot(fill='slategray1', color="black", alpha = 0.8) + 
+  labs(x="Neigborhood",y="Number of Resights /\n Number of Birds")
