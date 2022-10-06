@@ -1,11 +1,11 @@
-# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
+# Chloe Fugle
 # Shoals Marine Laboratory Internship, 7/20/2022
 # Compare productivity and percent fledged as measures of ROST fledsing success
 
 # replace this with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
-PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-2021.xlsx"
+PRODUCTIVITY_DATA = "ROST productivity raw data 2016-2021.xlsx"
 
 # import packages
 library(readxl)
@@ -172,7 +172,7 @@ productivity_df %>%
   geom_abline(slope=1,intercept=0, color="red4")  +
   scale_x_continuous(expand = c(0, 0), limits = c(-0.05, 1.65)) +
   scale_y_continuous(expand = c(0, 0), limits = c(-0.05, 1.05))  +
-  labs(x="Productivity (Fledged/Nest)",y="% Fledged (No. Fledged/No. Eggs)")
+  labs(x="Productivity (Fledged/Nest)",y="% Fledged\n(No. Fledged/No. Eggs)")
 
 ################################################################################
 # get productivity by year

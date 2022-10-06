@@ -1,11 +1,11 @@
-# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
+# Chloe Fugle
 # Shoals Marine Laboratory Internship, 7/3/2022
 # Get productivity distribution of Roseate Terns from 2017-2021
 
 # replace this with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
-PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-2021.xlsx"
+PRODUCTIVITY_DATA = "ROST productivity raw data 2016-2021.xlsx"
 
 # import packages
 library(readxl)

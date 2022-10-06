@@ -1,11 +1,11 @@
-# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
+# Chloe Fugle
 # Shoals Marine Laboratory Internship, 7/18/2022
 # Examine the effect of weather data on Roseate Tern fledging success
 
 # replace these with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
-TEMPERATURE_DATA = "C:/Users/sapph/OneDrive/Documents/2021-2022/Shoals/NARACOOS Weather Data.xlsx"
+TEMPERATURE_DATA = "NARACOOS Weather Data.xlsx"
 
 # import packages
 library(readxl)

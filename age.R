@@ -1,16 +1,16 @@
-# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
+# Chloe Fugle
 # Shoals Marine Laboratory Internship, 7/4/2022
 # Get mean age of Roseate Terns by neighborhood
 
 # replace these with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
-PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-2021.xlsx"
-RESIGHT_DATA = "C:/Users/sapph/Downloads/ROST resight raw data 2016-2022.xlsx"
-ALL_BANDING_DATA = "C:/Users/sapph/Downloads/ROST all PFR and MFR records from BBL proofed 6-21-21 out for review.xlsx"
+PRODUCTIVITY_DATA = "ROST productivity raw data 2016-2021.xlsx"
+RESIGHT_DATA = "ROST resight raw data 2016-2022.xlsx"
+ALL_BANDING_DATA = "ROST all PFR and MFR records from BBL proofed 6-21-21 out for review.xlsx"
 
 # path for excel file of all White and Seavey Island resights and their age and birth location
-EXPORT_EXCEL = "C:/Users/sapph/OneDrive/Documents/R/Shoals//ROST_Resight_Data.xlsx"
+EXPORT_EXCEL = "ROST_Resight_Data.xlsx"
 
 # import packages
 library(readxl)
@@ -345,9 +345,6 @@ percent_local %>%
   ggplot(aes(x = Percent_Local, y = Percent_Fledged)) +
   geom_point()  +                                   
   labs(x="% Local Terns",y="% Fledged")
-
-# perform one-way ANOVA modeling birth place as a function of neighborhood
-# anova = aov(Percent_Local ~ Neighborhood_Number, data = percent_local)
 
 # plot returning terns by neighborhood
 # does not double count birds that return to same neighborhood every year

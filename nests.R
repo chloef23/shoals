@@ -1,4 +1,4 @@
-# Chloe Fugle (chloe.m.fugle.23@dartmouth.edu)
+# Chloe Fugle
 # Shoals Marine Laboratory Internship, 7/20/2022
 # Get distribution of number of nests per neighborhood and the relationship
 # of nest number and productivity of the neighborhood
@@ -6,7 +6,7 @@
 # replace this with the path to your data on your computer
 # note: if you copy-paste the path on a Windows computer, it will have "\" in 
 #       the path - please replace all "\" with "/" for R to interpret it correctly
-PRODUCTIVITY_DATA = "C:/Users/sapph/Downloads/ROST productivity raw data 2016-2021.xlsx"
+PRODUCTIVITY_DATA = "ROST productivity raw data 2016-2021.xlsx"
 
 # import packages
 library(readxl)
@@ -166,8 +166,18 @@ resights_nests = nests_number[nests_number$Number_of_Nests != 0,]
 resights_nests$Percent_Resight = resights_nests$Number_of_Resights/ 
                                     (resights_nests$Number_of_Nests * 2)
 
+df_mean <- resights_nests %>% 
+  group_by(Neighborhood) %>% 
+  summarise(mean = mean(Number_of_Nests))
+
 resights_nests$Percent_Resight = as.numeric(resights_nests$Percent_Resight)
 resights_nests %>%                                           
   ggplot(aes(x=Neighborhood,y=Percent_Resight)) +            
   geom_boxplot(fill='slategray1', color="black", alpha = 0.8) + 
+  geom_text(data = df_mean, aes(label = mean, y =0.93), vjust = -.25) +
   labs(x="Neigborhood",y="Number of Resights /\n Number of Birds")
+
+# perform Kruskal-Wallace test modeling resight percent as a function of neighborhood
+kruskal = kruskal.test(Percent_Resight ~ Neighborhood, data = resights_nests)
+wilcox = pairwise.wilcox.test(resights_nests$Percent_Resight, resights_nests$Neighborhood,
+                     p.adjust.method = "BH")
